@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { TodoService } from "../../services/todo.service";
+import { element } from 'protractor';
 
 @Component({
   selector: 'app-todo',
@@ -7,9 +9,29 @@ import { Component, OnInit } from '@angular/core';
 })
 export class TodoComponent implements OnInit {
 
-  constructor() { }
+  todoListArray: any[];
+  constructor(private todoService: TodoService) { 
 
-  ngOnInit() {
   }
 
+  ngOnInit() {
+   this.todoService.getTodo().snapshotChanges()
+   .subscribe(item => {
+     this.todoListArray = [];
+     item.forEach( element => {
+       let x = element.payload.toJSON();
+       x["$key"] = element.key;
+       this.todoListArray.push(x);
+     });
+      this.todoListArray.sort((a, b) => {
+        return a.isCheked - b.isCheked;
+      })
+   })
+  }
+
+  addTodo(itemTitle){
+     this.todoService.addTodo(itemTitle.value);
+     itemTitle.value = null;
+     
+    }
 }
